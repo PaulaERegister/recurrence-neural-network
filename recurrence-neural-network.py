@@ -25,8 +25,15 @@ def read_file(file_name):
 
         print('Features: ' + ' '.join(text) + '\n')
         print('Label: ' + idx_word[np.argmax(training_dict['y_train'][i])] + '\n')
-    create_model(word_idx)
-    return training_dict
+    model = create_model(word_idx)
+    #train_model(training_dict)
+    for i in generate_output(model, sequences, idx_word, seed_length=50, new_words=30, diversity=0.75):
+        HTML(i)
+    s = 'This patent provides a basis for using a recurrent neural network to '
+    HTML(seed_sequence(model, s, word_idx, idx_word, diversity=0.75, num_words=20))
+    s = 'The cell state is passed along from one time step to another allowing the '
+    HTML(seed_sequence(model, s, word_idx, idx_word, diversity=0.75, num_words=20))
+    guess_human(model, sequences, idx_word)
 
 def create_model(word_idx):
     model = Sequential()
@@ -38,6 +45,7 @@ def create_model(word_idx):
     model.add(Dense(len(word_idx) + 1, activation='softmax'))
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     print(model.summary())
+    return model
 
 def train_model(training_dict):
     model = load_model('./models/train-embeddings-rnn.h5')
@@ -51,9 +59,9 @@ def train_model(training_dict):
     print('\nModel Performance: Log Loss and Accuracy on validation data')
     model.evaluate(training_dict['X_valid'], training_dict['y_valid'], batch_size=2048)
 
+
 def main():
     training_dict = read_file('./data/neural_network_patent_query.csv')
-    train_model(training_dict)
 
 main()
 
